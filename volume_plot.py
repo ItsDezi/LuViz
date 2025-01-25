@@ -19,14 +19,14 @@ def plot_csv(file_path1, timestamp, askVolume, bidVolume):
     
     # Plot the data using Plotly Graph Objects
     fig = go.Figure()
-    fig.add_trace(go.Scatter(x=data1[timestamp], y=data1[askVolume], mode='lines', name=askVolume))
-    fig.add_trace(go.Scatter(x=data1[timestamp], y=data1[bidVolume], mode='lines', name=bidVolume))
+    fig.add_trace(go.Scatter(x=data1[timestamp], y=data1[askVolume], mode='lines', marker=dict(color='red'), name=askVolume))
+    fig.add_trace(go.Scatter(x=data1[timestamp], y=data1[bidVolume], mode='lines', marker=dict(color='green'), name=bidVolume))
     
     fig.update_layout(title=f'{timestamp} vs {askVolume} and {bidVolume}',
                       xaxis_title=timestamp,
                       yaxis_title='Volume')
-    
-    fig.show()
+    return fig
+    #fig.show()
 
 # Example usage
 if __name__ == "__main__":
