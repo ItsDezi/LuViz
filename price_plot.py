@@ -1,12 +1,9 @@
 import pandas as pd
 import plotly.graph_objects as go
+from utils.read_stock_data import read_market_data, read_trade_data
 
-market_data_A_0_df = pd.read_csv('/home/mael/mchacks_2025/LuViz/data/TrainingData/Period1/A/market_data_A_0.csv', 
-                                 parse_dates=['timestamp'])
-market_data_A_1_df = pd.read_csv('/home/mael/mchacks_2025/LuViz/data/TrainingData/Period1/A/market_data_A_1.csv', header=None, 
-                                 names=market_data_A_0_df.columns, parse_dates=['timestamp'])
-market_data_combined_df = pd.concat([market_data_A_0_df, market_data_A_1_df], ignore_index=True)
-trade_data__A_df = pd.read_csv('/home/mael/mchacks_2025/LuViz/data/TrainingData/Period1/A/trade_data__A.csv', parse_dates=['timestamp'])
+market_data_combined_df = read_market_data('A', 1)
+trade_data__A_df = read_trade_data('A', 1)
 
 print(market_data_combined_df)
 
@@ -25,28 +22,3 @@ fig.update_layout(title='Bid Price and Trade Price over time',
                   template='plotly_white')
 
 fig.show()
-
-# market_data_A_0_df = pd.read_csv('/home/mael/mchacks_2025/LuViz/data/TrainingData/Period1/A/market_data_A_0.csv', 
-#                                  parse_dates=['timestamp'])
-# market_data_A_1_df = pd.read_csv('/home/mael/mchacks_2025/LuViz/data/TrainingData/Period1/A/market_data_A_1.csv', header=None, 
-#                                  names=market_data_A_0_df.columns, parse_dates=['timestamp'])
-# market_data_combined_df = pd.concat([market_data_A_0_df, market_data_A_1_df], ignore_index=True)
-# trade_data__A_df = pd.read_csv('/home/mael/mchacks_2025/LuViz/data/TrainingData/Period1/A/trade_data__A.csv', parse_dates=['timestamp'])
-
-# print(market_data_combined_df)
-
-# plt.figure(figsize=(10, 6))
-# plt.plot(market_data_combined_df['timestamp'], market_data_combined_df['bidPrice'], label='Bid Price')
-# plt.plot(trade_data__A_df['timestamp'], trade_data__A_df['price'], label='Trade Price')
-# plt.scatter(trade_data__A_df['timestamp'], trade_data__A_df['price'], c='red', s=10, label='Trade Volume', alpha=0.5)
-
-# plt.xlabel('Timestamp')
-# plt.ylabel('Price')
-# plt.title('Bid Price and Trade Price over time')
-# plt.legend()
-# plt.grid(True)
-# plt.xticks(rotation=45)
-# plt.tight_layout()
-
-# plt.savefig('plot.png')
-# plt.show()
