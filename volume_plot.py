@@ -1,6 +1,7 @@
 import pandas as pd
 import plotly.graph_objects as go
 import os
+from plotly.subplots import make_subplots
 
 # Function to read CSV and plot two columns
 def plot_csv(file_path1, timestamp, askVolume, bidVolume):
@@ -18,13 +19,25 @@ def plot_csv(file_path1, timestamp, askVolume, bidVolume):
         data1 = pd.concat([data1, data2], ignore_index=True)
     
     # Plot the data using Plotly Graph Objects
-    fig = go.Figure()
-    fig.add_trace(go.Scatter(x=data1[timestamp], y=data1[askVolume], mode='lines', marker=dict(color='red'), name=askVolume))
-    fig.add_trace(go.Scatter(x=data1[timestamp], y=data1[bidVolume], mode='lines', marker=dict(color='green'), name=bidVolume))
+    fig = make_subplots(rows=2, cols=1,
+                    shared_xaxes=True,
+                    vertical_spacing=0.02)
+
+    fig.add_trace(go.Scatter(x=data1[timestamp], y=data1[askVolume], mode='lines', marker=dict(color='red'), name=askVolume), row=1, col=1)
+    fig.add_trace(go.Scatter(x=data1[timestamp], y=data1[bidVolume], mode='lines', marker=dict(color='green'), name=bidVolume), row=1, col=1)
     
     fig.update_layout(title=f'{timestamp} vs {askVolume} and {bidVolume}',
                       xaxis_title=timestamp,
                       yaxis_title='Volume')
+    #-----------------------------------------
+    trade_data_file = [file for file in os.listdir(file_path1) if file.startswith('trade_data')][0]
+    print("bruhuuhuhuh" + trade_data_file)
+    trade_data = pd.read_csv(file_path1 + '/' + trade_data_file, parse_dates=['timestamp'])
+    fig.add_trace(go.Scatter(x=data1['timestamp'], y=data1['bidPrice'], mode='lines', name='Bid Price'), row=2, col=1)
+    fig.add_trace(go.Scatter(x=data1['timestamp'], y=data1['askPrice'], mode='lines', name='Ask Price'), row=2, col=1)
+    fig.add_trace(go.Scatter(x=trade_data['timestamp'], y=trade_data['price'], mode='lines', name='Trade Price'), row=2, col=1)
+
+    #-----------------------------------------
     return fig
     #fig.show()
 
