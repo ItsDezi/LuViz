@@ -3,6 +3,7 @@ import plotly.graph_objects as go
 import os
 from plotly.subplots import make_subplots
 
+
 # Function to read CSV and plot two columns
 def plot_csv(file_path1, timestamp, askVolume, bidVolume):
     # Read the first CSV file and parse the timestamp column as datetime
