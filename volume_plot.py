@@ -31,7 +31,6 @@ def plot_csv(file_path1, timestamp, askVolume, bidVolume):
                       yaxis_title='Volume')
     #-----------------------------------------
     trade_data_file = [file for file in os.listdir(file_path1) if file.startswith('trade_data')][0]
-    print("bruhuuhuhuh" + trade_data_file)
     trade_data = pd.read_csv(file_path1 + '/' + trade_data_file, parse_dates=['timestamp'])
     fig.add_trace(go.Scatter(x=data1['timestamp'], y=data1['bidPrice'], mode='lines', name='Bid Price'), row=2, col=1)
     fig.add_trace(go.Scatter(x=data1['timestamp'], y=data1['askPrice'], mode='lines', name='Ask Price'), row=2, col=1)
