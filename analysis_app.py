@@ -2,42 +2,82 @@ import streamlit as st
 import plotly.graph_objects as go
 import pandas as pd
 import numpy as np
-from luviz.parser import read_market_data, read_trade_data
+from luviz.parser import read_market_data
 from luviz.plotter import plot_candlestick, plot_std_dev, plot_group_price_time_series_scatter
 from scipy.signal import correlate
-# from transformers import TimeSeriesTransformerForPrediction, Trainer, TrainingArguments
-# Replace the Hugging Face model with a simpler PyTorch model
+# Replace the problematic model import with:
+from transformers import TimeSeriesTransformerConfig, TimeSeriesTransformerModel
 import torch
-import torch.nn as nn
 
-class StockPredictor(nn.Module):
-    def __init__(self, input_size=5, hidden_size=64):
-        super().__init__()
-        self.lstm = nn.LSTM(input_size, hidden_size, batch_first=True)
-        self.fc = nn.Linear(hidden_size, 1)
-        
-    def forward(self, x):
-        out, _ = self.lstm(x)
-        return self.fc(out[:, -1, :])
+def train_model(train_data, target_stock):
+    """Updated model training with aligned lengths"""
+    config = TimeSeriesTransformerConfig(
+        prediction_length=10,
+        context_length=70,  # Must match history_length - lags_sequence
+        input_size=1,
+        num_time_features=1,
+        encoder_layers=2,
+        decoder_layers=2,
+        lags_sequence=[1, 7, 14],  # Reduced lags to fit context
+        num_static_real_features=0,
+        scaling=False
+    )
+    
+    model = TimeSeriesTransformerModel(config)
+    optimizer = torch.optim.Adam(model.parameters(), lr=1e-4)
 
-def train_model(train_data):
-    model = StockPredictor()
-    criterion = nn.MSELoss()
-    optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
+    for _ in range(5):
+        model.train()
+        for batch in create_batches(train_data, target_stock):
+            outputs = model(
+                past_values=batch['past_values'],
+                past_time_features=batch['past_time_features'],
+                past_observed_mask=batch['past_observed_mask'],
+                future_values=batch['future_values'],
+                future_time_features=batch['future_time_features']
+            )
+            loss = outputs.loss
+            loss.backward()
+            optimizer.step()
+            optimizer.zero_grad()
     
-    # Convert data to tensors
-    X = torch.tensor(train_data.values[:-1], dtype=torch.float32).unsqueeze(0)
-    y = torch.tensor(train_data.values[1:], dtype=torch.float32).unsqueeze(0)
-    
-    # Training loop
-    for epoch in range(100):
-        optimizer.zero_grad()
-        outputs = model(X)
-        loss = criterion(outputs, y)
-        loss.backward()
-        optimizer.step()
-        
     return model
+
+def create_batches(data, target_stock, batch_size=32):
+    """Create aligned batches with exact length matching"""
+    history_length = 70  # Matches context_length + max(lags_sequence)
+    prediction_length = 10
+    total_length = history_length + prediction_length
+    
+    num_samples = len(data) - total_length
+    
+    for i in range(0, num_samples, batch_size):
+        batch = {
+            'past_values': [],
+            'past_time_features': [],
+            'past_observed_mask': [],
+            'future_values': [],
+            'future_time_features': []
+        }
+        
+        for j in range(i, min(i+batch_size, num_samples)):
+            window = data[target_stock].iloc[j:j+total_length]
+            
+            # Strict length enforcement
+            past_values = window.values[:history_length]
+            past_time = np.arange(history_length).reshape(-1, 1)
+            future_time = np.arange(history_length, history_length+prediction_length).reshape(-1, 1)
+            
+            batch['past_values'].append(past_values)
+            batch['past_time_features'].append(past_time)
+            batch['past_observed_mask'].append(np.ones_like(past_values))
+            batch['future_values'].append(window.values[history_length:])
+            batch['future_time_features'].append(future_time)
+        
+        yield {
+            k: torch.tensor(np.array(v), dtype=torch.float32 if k != 'past_observed_mask' else torch.bool)
+            for k, v in batch.items()
+        }
 
 # Custom preprocessing and analysis functions
 def preprocess_data(raw_data: pd.DataFrame) -> pd.DataFrame:
@@ -95,26 +135,6 @@ def prepare_train_data(all_stocks_data: dict):
     combined.bfill(inplace=True)
     
     return combined
-
-# def train_model(train_data, val_data):
-#     """Train Hugging Face time series transformer"""
-#     model = TimeSeriesTransformerForPrediction.from_pretrained("ibm-automl/ts-transformer")
-    
-#     training_args = TrainingArguments(
-#         output_dir='./results',
-#         learning_rate=1e-4,
-#         num_train_epochs=10,
-#         per_device_train_batch_size=32,
-#     )
-    
-#     trainer = Trainer(
-#         model=model,
-#         args=training_args,
-#         train_dataset=train_data,
-#         eval_dataset=val_data,
-#     )
-#     trainer.train()
-#     return model
 
 # Streamlit app layout
 st.set_page_config(layout="wide")
@@ -193,19 +213,20 @@ with col2:
 
 # Model training and prediction section
 st.header("Predictive Analytics")
+# Updated Streamlit training section
 if st.button("Train Prediction Model"):
     with st.spinner("Training model..."):
         train_data = prepare_train_data(all_stocks_data)
-        model = train_model(train_data)
+        model = train_model(train_data, selected_stock)
         
         # Generate predictions
-        with torch.no_grad():
-            test_input = torch.tensor(train_data.values[-100:], dtype=torch.float32).unsqueeze(0)
-            predictions = model(test_input).numpy().flatten()
-            
+        test_window = train_data[selected_stock].values[-70:-10]
+        predictions = model(torch.tensor(test_window, dtype=torch.float32).unsqueeze(0))
+        
+        # Display results
         st.line_chart(pd.DataFrame({
-            "Actual": train_data[selected_stock].values[-100:],
-            "Predicted": predictions
+            "Actual": train_data[selected_stock].values[-60:],
+            "Predicted": predictions.last_hidden_state.detach().numpy().flatten()[:60]
         }))
         
         # Generate trading signals
