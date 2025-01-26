@@ -30,6 +30,7 @@ def plot_csv(file_path1, timestamp, askVolume, bidVolume):
     
     fig.update_layout(title=f'Volume and Price over Time',
                       xaxis_title=timestamp,
+                      xaxis_rangeslider_visible=True,
                       yaxis_title='Volume')
     #-----------------------------------------
     trade_data_file = [file for file in os.listdir(file_path1) if file.startswith('trade_data')][0]
@@ -37,7 +38,8 @@ def plot_csv(file_path1, timestamp, askVolume, bidVolume):
     fig.add_trace(go.Scatter(x=data1['timestamp'], y=data1['bidPrice'], mode='lines', name='Bid Price'), row=2, col=1)
     fig.add_trace(go.Scatter(x=data1['timestamp'], y=data1['askPrice'], mode='lines', name='Ask Price'), row=2, col=1)
     fig.add_trace(go.Scatter(x=trade_data['timestamp'], y=trade_data['price'], mode='lines', name='Trade Price'), row=2, col=1)
-
+    fig.update_layout(legend_orientation="h", 
+             xaxis_rangeslider_visible=True, xaxis_rangeslider_thickness=0.001 )
     #-----------------------------------------
     return fig
     #fig.show()
