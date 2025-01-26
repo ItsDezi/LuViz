@@ -43,9 +43,9 @@ def plot_csv(file_path1, timestamp, askVolume, bidVolume):
     #fig.show()
 
 # Example usage
-if __name__ == "__main__":
-    file_path1 = 'data/TrainingData/Period1/C'  # Replace with your CSV file path
-    time = 'timestamp'
-    askVolume = 'askVolume' 
-    bidVolume = 'bidVolume'
-    plot_csv(file_path1, time, askVolume, bidVolume)
+# if __name__ == "__main__":
+#     file_path1 = 'data/TrainingData/Period1/C'  # Replace with your CSV file path
+#     time = 'timestamp'
+#     askVolume = 'askVolume' 
+#     bidVolume = 'bidVolume'
+#     plot_csv(file_path1, time, askVolume, bidVolume)

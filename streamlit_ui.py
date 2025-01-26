@@ -33,11 +33,10 @@ if selected == "Price Vs. Volume":
             "Period",
             ("1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15")
         )
-    file_path1 = 'data/TrainingData/Period' + option_period + '/' + option_stock  # Replace with your CSV file path
+    file_path1 = 'data/TrainingData' + '/Period' + option_period + '/Period' + option_period + '/' + option_stock  # Replace with your CSV file path
 
 
     st.write(plot_csv(file_path1, 'timestamp', 'askVolume', 'bidVolume'))  # Call the plot_csv function
-    st.button("Add a chart", type="primary")
 
 
 if selected == "Contact":
