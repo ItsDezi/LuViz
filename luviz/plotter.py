@@ -24,24 +24,33 @@ def plot_price_time_series_scatter(stock:str, period: int, price_type: str) -> g
     return fig
 
 
-def plot_group_price_time_series_scatter(stock:list[str], period: int, price_type: str) -> go.Figure:
+def plot_group_price_time_series_scatter(stocks:list[str], period: int, price_types: list[str]) -> go.Figure:
 
-    if price_type in ['ask', 'bid']:
-        price_id = price_type + 'Price'
-        df = read_market_data(stock, period)
-    elif price_type == 'trade':
-        price_id = 'price'
-        df = read_trade_data(stock, period)
-    else:
-        raise ValueError("Unknown price type error")
-    
     fig = go.Figure()
+    for stock in stocks:
+        tracker = 0
+        for price_type in price_types:
+            if price_type in ['ask', 'bid']:
+                price_id = price_type + 'Price'
+                if tracker > 0: continue
+                df = read_market_data(stock, period)
+                tracker += 1
+            elif price_type == 'trade':
+                price_id = 'price'
+                df = read_trade_data(stock, period)
+            else:
+                raise ValueError("Unknown price type error")
 
-    fig.add_trace(go.Scatter(x=df['timestamp'], y=df[price_id], mode='lines', name=price_type.capitalize() + ' Price'))
+            fig.add_trace(go.Scatter(x=df['timestamp'], y=df[price_id], mode='lines', name=stock + ' ' + price_type.capitalize() + ' Price', legendgroup=price_type))
 
-    fig.update_layout(title=f'{price_type.capitalize()} Price vs time',
+    fig.update_layout(title=f'{" ".join([pt.capitalize() for pt in price_types])} Price vs time',
                     xaxis_title='Time',
                     yaxis_title='Price',
+                    legend=dict(
+                        title='Stock',
+                        traceorder='normal'
+                    ),
                     xaxis=dict(tickformat='%Y-%m-%d %H:%M:%S', tickangle=45),
                     template='plotly_white')
+    
     return fig
