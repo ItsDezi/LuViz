@@ -2,9 +2,10 @@ import pandas as pd
 import plotly.graph_objects as go
 import os
 from plotly.subplots import make_subplots
-
+import functools
 
 # Function to read CSV and plot two columns
+@functools.cache
 def plot_csv(file_path1, timestamp, askVolume, bidVolume):
     # Read the first CSV file and parse the timestamp column as datetime
     first_csv = [file for file in os.listdir(file_path1) if file.startswith('market_data') and file.endswith('0.csv')][0]
@@ -27,7 +28,7 @@ def plot_csv(file_path1, timestamp, askVolume, bidVolume):
     fig.add_trace(go.Scatter(x=data1[timestamp], y=data1[askVolume], mode='lines', marker=dict(color='red'), name=askVolume), row=1, col=1)
     fig.add_trace(go.Scatter(x=data1[timestamp], y=data1[bidVolume], mode='lines', marker=dict(color='green'), name=bidVolume), row=1, col=1)
     
-    fig.update_layout(title=f'{timestamp} vs {askVolume} and {bidVolume}',
+    fig.update_layout(title=f'Volume and Price over Time',
                       xaxis_title=timestamp,
                       yaxis_title='Volume')
     #-----------------------------------------
