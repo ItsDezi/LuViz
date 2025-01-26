@@ -223,3 +223,94 @@ def plot_group_price_time_series_scatter(stocks:list[str], period: int, price_ty
                     height=600)
     
     return fig
+
+
+def plot_stock_comparison_tool(stock1: str, period1: int, stock2: str, period2: int) -> go.Figure:
+    df_market1 = read_market_data(stock1, period1)
+    df_trade1 = read_trade_data(stock1, period1)
+    df_market2 = read_market_data(stock2, period2)
+    df_trade2 = read_trade_data(stock2, period2)
+    fig = make_subplots(rows=2, cols=2, shared_xaxes=True, vertical_spacing=0.02)
+    colors = ['blue', 'red', 'green', 'orange', 'purple']
+    
+    # Add traces with consistent names and indices
+    traces = [
+        ('Bid Volume', df_market1['timestamp'], df_market1['bidVolume'], 1),
+        ('Ask Volume', df_market1['timestamp'], df_market1['askVolume'], 1),
+        ('Bid Price', df_market1['timestamp'], df_market1['bidPrice'], 2),
+        ('Ask Price', df_market1['timestamp'], df_market1['askPrice'], 2),
+        ('Trade Price', df_trade1['timestamp'], df_trade1['price'], 2)
+    ]
+    traces2 = [
+        ('Bid Volume', df_market2['timestamp'], df_market2['bidVolume'], 1),
+        ('Ask Volume', df_market2['timestamp'], df_market2['askVolume'], 1),
+        ('Bid Price', df_market2['timestamp'], df_market2['bidPrice'], 2),
+        ('Ask Price', df_market2['timestamp'], df_market2['askPrice'], 2),
+        ('Trade Price', df_trade2['timestamp'], df_trade2['price'], 2)
+    ]
+    for i, (name, x, y, col) in enumerate(traces):
+        fig.add_trace(
+            go.Scatter(
+                x=x, 
+                y=y,
+                mode='lines',
+                marker=dict(color=colors[i]),
+                name=name,
+                visible=True
+            ),
+            row=1,
+            col=col
+        )
+    for i, (name, x, y, col) in enumerate(traces2):
+        fig.add_trace(
+            go.Scatter(
+                x=x, 
+                y=y,
+                mode='lines',
+                marker=dict(color=colors[i]),
+                name=name,
+                visible=True
+            ),
+            row=2,
+            col=col
+        )
+    # Create update menus (buttons) for each trace
+    um = []
+    menuadjustment = 0.15
+    buttonX = 0.5
+    buttonY = -0.2
+
+    for i, (name, _, _, _) in enumerate(traces):
+        # For each metric, we need to control visibility of same metric in both stocks
+        # i is for stock1, i+5 is for stock2 (since there are 5 traces per stock)
+        button = dict(
+            method='restyle',
+            label=name,
+            visible=True,
+            args=[{'visible': True, 'line.color': colors[i]}, [i, i+5]],
+            args2=[{'visible': False, 'line.color': colors[i]}, [i, i+5]]
+        )
+        
+        buttonX = buttonX - menuadjustment
+        um.append({
+            'buttons': [button],
+            'showactive': False,
+            'y': buttonY,
+            'x': buttonX,
+            'type': 'buttons',
+            'xanchor': 'center',
+            'yanchor': 'top'
+        })
+
+    fig.update_layout(
+        title='Volume and Price over Time',
+        xaxis_title='Time',
+        xaxis_rangeslider_visible=False,
+        autosize=True,
+        width=1000,
+        template='plotly_dark',
+        showlegend=True,
+        updatemenus=um
+    )
+
+    return fig

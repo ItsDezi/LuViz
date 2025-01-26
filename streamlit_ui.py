@@ -4,19 +4,46 @@ import streamlit_option_menu
 from streamlit_option_menu import option_menu
 import os
 from volume_plot import plot_csv  # Import the plot_csv function
-from luviz.plotter import plot_group_price_time_series_scatter, plot_candlestick, plot_price_time_series_scatter_subplots, plot_toggleable_volume_price
+from luviz.plotter import plot_group_price_time_series_scatter, plot_candlestick, plot_price_time_series_scatter_subplots, plot_stock_comparison_tool, plot_toggleable_volume_price
 
 with st.sidebar:
     selected = option_menu(
         menu_title="LuViz",
-        options=["Home", "Price Vs. Volume", "Candlestick Charts"],
+        options=["Asset Comparison", "Price Vs. Volume", "Candlestick Charts"],
         icons=["house", "graph-up", "align-middle"],
         menu_icon="bi-brightness-alt-high",
         default_index=0,
     )
 
-if selected == "Home":
-    st.title(f"You Have selected {selected}")
+if selected == "Asset Comparison":
+    st.title(f"Asset Comparison")
+    col1, col2, col3, col4 = st.columns(4)
+    with col1:
+        option_stock = st.selectbox(
+            "Stock",
+            ("A", "B", "C", "D", "E"),
+            key="col1"
+        )
+    with col2:
+        option_period = st.selectbox(
+            "Period",
+            list(range(1, 16)),
+            key="col2"
+        )
+    with col3:
+        option_stock2 = st.selectbox(
+            "Stock",
+            ("A", "B", "C", "D", "E"),
+            key="col3"
+        )
+    with col4:
+        option_period2 = st.selectbox(
+            "Period",
+            list(range(1, 16)),
+            key="col4"
+        )
+    st.plotly_chart(plot_stock_comparison_tool(option_stock, option_period2, option_stock2, option_period2), use_container_width=False)    
+
 
 if selected == "Price Vs. Volume":
     st.title(f"Price and Volume comparison")
@@ -35,9 +62,25 @@ if selected == "Price Vs. Volume":
         )
     file_path1 = 'data/TrainingData' + '/Period' + str(option_period) + '/Period' + str(option_period) + '/' + option_stock  # Replace with your CSV file path
 
+    tmp = plot_toggleable_volume_price(option_stock, option_period)
+    #print(tmp)
 
-    st.write(plot_toggleable_volume_price(option_stock, option_period))  # Call the plot_csv function
-    
+    st.write(tmp)  # Call the plot_csv function
+    # c1, c2 = st.columns(2)
+    # with c1:
+
+    #     st.markdown("Maximum Bid Volume: " + str())
+    #     st.markdown("Maximum Ask Volume: " + str())
+    #     st.markdown("Maximum Bid Price: " + str())
+    #     st.markdown("Maximum Ask Price: " + str())
+    #     st.markdown("Maximum Trade Price: " + str())
+    # with c2:
+    #     st.markdown("Minimum Bid Volume: " + str())
+    #     st.markdown("Minimum Ask Volume: " + str())
+    #     st.markdown("Minimum Bid Price: " + str())
+    #     st.markdown("Minimum Ask Price: " + str())
+    #     st.markdown("Minimum Trade Price: " + str())
+
 
 if selected == "Candlestick Charts":
     st.title(f"{selected}")
