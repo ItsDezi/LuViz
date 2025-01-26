@@ -307,7 +307,6 @@ def plot_stock_comparison_tool(stock1: str, period1: int, stock2: str, period2: 
         xaxis_title='Time',
         xaxis_rangeslider_visible=False,
         autosize=True,
-        width=1000,
         template='plotly_dark',
         showlegend=True,
         updatemenus=um
