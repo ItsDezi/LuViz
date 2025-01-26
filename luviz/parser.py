@@ -25,8 +25,10 @@ Functions:
 
 import os
 import pandas as pd
+import functools
 
 # Function to read CSV and plot two columns
+@functools.cache
 def read_market_data(stock:str, period: int, parsing_header:str ='timestamp') -> pd.DataFrame:
     
     if stock not in ['A', 'B', 'C', 'D', 'E']:
@@ -34,7 +36,7 @@ def read_market_data(stock:str, period: int, parsing_header:str ='timestamp') ->
     if period not in range(1, 16):
         raise ValueError("Unknown period error")
     
-    folder_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), f'../data/TrainingData/Period{period}/{stock}')
+    folder_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), f'../data/TrainingData/Period{period}/Period{period}/{stock}')
 
     # Read the first CSV file and parse the timestamp column as datetime
     first_csv = f'market_data_{stock}_0.csv'  
@@ -47,13 +49,13 @@ def read_market_data(stock:str, period: int, parsing_header:str ='timestamp') ->
     
     # Rename the columns of other DataFrames to match the first
     for file in other_csvs:
-        curr_data = pd.read_csv(folder_path + '/' + file, parse_dates=[parsing_header], header=None, names=columns)
+        curr_data = pd.read_csv(folder_path + '/' + file, parse_dates=[parsing_header], header=None, names=columns, skiprows=1)
         curr_data.columns = columns
         data = pd.concat([data, curr_data], ignore_index=True)
     
-    return data
+    return data.sort_values(by='timestamp')
 
-
+@functools.cache
 def read_trade_data(stock: str, period: int, parsing_header: str = 'timestamp') -> pd.DataFrame:
     
     if stock not in ['A', 'B', 'C', 'D', 'E']:
@@ -61,7 +63,7 @@ def read_trade_data(stock: str, period: int, parsing_header: str = 'timestamp') 
     if period not in range(1, 16):
         raise ValueError("Unknown period error")
     
-    folder_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), f'../data/TrainingData/Period{period}/{stock}')
+    folder_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), f'../data/TrainingData/Period{period}/Period{period}/{stock}')
 
     # Read the trade csv file and parse the timestamp column as datetime
     trade_csv = f'trade_data__{stock}.csv'  
