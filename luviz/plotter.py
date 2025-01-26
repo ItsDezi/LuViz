@@ -28,6 +28,31 @@ def plot_price_time_series_scatter(stock:str, period: int, price_type: str) -> g
                     height=600)
     return fig
 
+def plot_std_dev(stock: str, period: int, interval: str = '30S') -> go.Figure:
+    if interval not in ['30S', '60S']:
+        raise ValueError("Interval must be '30S' or '60S'")
+    
+    df = read_market_data(stock, period)
+    df = df.set_index('timestamp')
+    
+    std_dev = df['bidPrice'].resample(interval).std()
+    std_dev_df = std_dev.reset_index()
+    
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(x=std_dev_df['timestamp'], y=std_dev_df['bidPrice'], mode='lines', name='Standard Deviation'))
+    
+    fig.update_layout(title=f'Standard Deviation of Bid Price over {interval} intervals',
+                        xaxis_title='Time',
+                        yaxis_title='Standard Deviation',
+                        xaxis=dict(tickformat='%H:%M:%S', tickangle=45),
+                        template='plotly_white',
+                        xaxis_rangeslider_visible=True,
+                        autosize=False,
+                        width=1000,
+                        height=600)
+    
+    return fig
+
 def compute_ohlc(df, freq='1S'):
     df = df.set_index('timestamp')
     ohlc_dict = {
