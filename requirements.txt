@@ -6,4 +6,4 @@ transformers
 pandas
 numpy
 scipy
-torch
+scikit-learn

@@ -4,14 +4,15 @@ import streamlit_option_menu
 from streamlit_option_menu import option_menu
 import os
 from volume_plot import plot_csv  # Import the plot_csv function
-from luviz.plotter import plot_group_price_time_series_scatter, plot_candlestick, plot_price_time_series_scatter_subplots, plot_std_dev, plot_stock_comparison_tool, plot_toggleable_volume_price
+from luviz.plotter import plot_group_price_time_series_scatter, plot_candlestick, plot_price_time_series_scatter_subplots, plot_std_dev, plot_stock_comparison_tool, plot_toggleable_volume_price, plot_trade_predicted_subplots
+from luviz.predict import predict
 
 st.set_page_config(layout="wide")
 
 with st.sidebar:
     selected = option_menu(
         menu_title="LuViz",
-        options=["Asset Comparison", "Price Vs. Volume", "Candlestick Charts", "Standard Deviation"],
+        options=["Asset Comparison", "Price Vs. Volume", "Candlestick Charts", "Standard Deviation", "AI Predictions"],
         icons=["house", "graph-up", "align-middle"],
         menu_icon="bi-brightness-alt-high",
         default_index=0,
@@ -129,3 +130,22 @@ if selected == "Standard Deviation":
         )
     file_path1 = 'data/TrainingData' + '/Period' + str(option_period) + '/Period' + str(option_period) + '/' + str(option_stock)  # Replace with your CSV file path
     st.plotly_chart(plot_std_dev(option_stock, option_period, option_frequency))
+
+
+if selected == "AI Predictions":
+    st.title("AI predictions(Experimental)")
+    st.markdown("This feature is experimental and may not be accurate. It will pull from the test data provided.")
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        option_stock = st.selectbox(
+            "Stock",
+            ("A", "B", "C", "D", "E"),
+        )
+    with col2:
+        option_period = st.selectbox(
+            "Period",
+            list(range(1, 21))
+        )
+    predictions = predict(option_period, option_stock)
+    file_path1 = 'data/TrainingData' + '/Period' + str(option_period) + '/Period' + str(option_period) + '/' + str(option_stock)  # Replace with your CSV file path
+    st.plotly_chart(plot_trade_predicted_subplots(option_stock, option_period, ))

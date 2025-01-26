@@ -313,3 +313,19 @@ def plot_stock_comparison_tool(stock1: str, period1: int, stock2: str, period2: 
     )
 
     return fig
+
+def plot_trade_predicted_subplots(stock: str, period: int, predicitions) -> go.Figure:
+    df_trade = read_trade_data(stock, period)
+    predicitions = predicitions[predicitions['predictions'] != 0]
+
+    fig = make_subplots(rows=2, cols=1, shared_xaxes=True, vertical_spacing=0.02)
+
+    fig.add_trace(go.Scatter(x=df_trade['timestamp'], y=df_trade['price'], mode='lines', marker=dict(color='purple'), name='Trade Price'), row=1, col=1)
+    fig.add_trace(go.Scatter(x=df_trade['timestamp'], y=df_trade['mid_price'], mode='lines', marker=dict(color='green'), name='Predicted Trade Price'), row=2, col=1)
+
+    fig.update_layout(title=f'Price over Time',
+                      xaxis_title='Time',
+                      xaxis_rangeslider_visible=False,
+                      height=800)
+
+    return fig
