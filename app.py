@@ -3,7 +3,7 @@ import pandas as pd
 import streamlit_option_menu
 from streamlit_option_menu import option_menu
 import os
-from luviz.plotter import plot_group_price_time_series_scatter
+from luviz.plotter import plot_group_price_time_series_scatter, plot_candlestick
 
 with st.sidebar:
     selected = option_menu(
@@ -16,8 +16,8 @@ with st.sidebar:
 
 if selected == "Home":
     st.title(f"You Have selected {selected}")
-    st.plotly_chart(plot_group_price_time_series_scatter({'C'}, 1, {'bid'}))  # Call the plot_csv function
-
+    # st.plotly_chart(plot_group_price_time_series_scatter({'A'}, 1, {'trade', 'bid'}))  # Call the plot_csv function
+    st.plotly_chart(plot_candlestick('A', 1, '1S'))  # Call the plot_csv function
 if selected == "price_volume_plot":
     st.title(f"Price and Volume comparison")
     # st.plotly_chart(plot_group_price_time_series_scatter({'A'}, 1, {'bid'}))  # Call the plot_csv function

@@ -1,5 +1,6 @@
 import plotly.graph_objects as go
 from luviz.parser import read_market_data, read_trade_data
+import pandas as pd 
 
 def plot_price_time_series_scatter(stock:str, period: int, price_type: str) -> go.Figure:
 
@@ -19,10 +20,46 @@ def plot_price_time_series_scatter(stock:str, period: int, price_type: str) -> g
     fig.update_layout(title=f'{price_type.capitalize()} Price vs time',
                     xaxis_title='Time',
                     yaxis_title='Price',
-                    xaxis=dict(tickformat='%Y-%m-%d %H:%M:%S', tickangle=45),
-                    template='plotly_white')
+                    xaxis=dict(tickformat='%H:%M:%S', tickangle=45),
+                    template='plotly_white',
+                    xaxis_rangeslider_visible=True,
+                    autosize=False,
+                    width=1000,
+                    height=600)
     return fig
 
+def compute_ohlc(df, freq='1S'):
+    df = df.set_index('timestamp')
+    ohlc_dict = {
+        'openPrice': df['bidPrice'].resample(freq).first(),
+        'highPrice': df['bidPrice'].resample(freq).max(),
+        'lowPrice': df['bidPrice'].resample(freq).min(),
+        'closePrice': df['bidPrice'].resample(freq).last()
+    }
+    ohlc_df = pd.DataFrame(ohlc_dict)
+    ohlc_df.reset_index(inplace=True)
+    return ohlc_df
+
+def plot_candlestick(stock: str, period: int, freq='1S') -> go.Figure:
+    df = read_market_data(stock, period)
+    df = compute_ohlc(df, freq)
+
+    fig = go.Figure(data=[go.Candlestick(x=df['timestamp'],
+                                            open=df['openPrice'],
+                                            high=df['highPrice'],
+                                            low=df['lowPrice'],
+                                            close=df['closePrice'])])
+
+    fig.update_layout(title=f'Candlestick chart for {stock}',
+                        xaxis_title='Time',
+                        yaxis_title='Price',
+                        xaxis=dict(tickformat='%H:%M:%S', tickangle=45),
+                        template='plotly_white',
+                        xaxis_rangeslider_visible=True,
+                        autosize=False,
+                        width=1000,
+                        height=600)
+    return fig
 
 def plot_group_price_time_series_scatter(stocks:list[str], period: int, price_types: list[str]) -> go.Figure:
 
@@ -50,7 +87,11 @@ def plot_group_price_time_series_scatter(stocks:list[str], period: int, price_ty
                         title='Stock',
                         traceorder='normal'
                     ),
-                    xaxis=dict(tickformat='%Y-%m-%d %H:%M:%S', tickangle=45),
-                    template='plotly_white')
+                    xaxis=dict(tickformat='%H:%M:%S', tickangle=45),
+                    template='plotly_white',
+                    xaxis_rangeslider_visible=True,
+                    autosize=False,
+                    width=1000,
+                    height=600)
     
     return fig
