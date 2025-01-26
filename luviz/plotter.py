@@ -53,98 +53,81 @@ def plot_toggleable_volume_price(stock: str, period: int) -> go.Figure:
     df_trade = read_trade_data(stock, period)
 
     fig = make_subplots(rows=2, cols=1, shared_xaxes=True, vertical_spacing=0.02)
+    colors = ['blue', 'red', 'green', 'orange', 'purple']
+    
+    # Add traces with consistent names and indices
+    traces = [
+        ('Bid Volume', df_market['timestamp'], df_market['bidVolume'], 1),
+        ('Ask Volume', df_market['timestamp'], df_market['askVolume'], 1),
+        ('Bid Price', df_market['timestamp'], df_market['bidPrice'], 2),
+        ('Ask Price', df_market['timestamp'], df_market['askPrice'], 2),
+        ('Trade Price', df_trade['timestamp'], df_trade['price'], 2)
+    ]
 
-    # Add volume traces
-    fig.add_trace(go.Scatter(x=df_market['timestamp'], y=df_market['bidVolume'], mode='lines', marker=dict(color='blue'), name='Bid Volume', visible=True), row=1, col=1)
-    fig.add_trace(go.Scatter(x=df_market['timestamp'], y=df_market['askVolume'], mode='lines', marker=dict(color='red'), name='Ask Volume', visible=True), row=1, col=1)
-
-    # Add price traces
-    fig.add_trace(go.Scatter(x=df_market['timestamp'], y=df_market['bidPrice'], mode='lines', marker=dict(color='green'), name='Bid Price', visible=True), row=2, col=1)
-    fig.add_trace(go.Scatter(x=df_market['timestamp'], y=df_market['askPrice'], mode='lines', marker=dict(color='orange'), name='Ask Price', visible=True), row=2, col=1)
-    fig.add_trace(go.Scatter(x=df_trade['timestamp'], y=df_trade['price'], mode='lines', marker=dict(color='purple'), name='Trade Price', visible=True), row=2, col=1)
-
-    initial_visible = [True, True, True, True, True]
-    # Update layout with checkboxes
-    fig.update_layout(
-        updatemenus=[
-            dict(
-                type="buttons",
-                buttons=list([
-                    dict(label="Bid Volume",
-                         method="update",
-                         args=[{"visible": [True, False, True, True, True]},
-                               {"title": "Bid Volume"}],
-                         args2=[{"visible": [False, False, False, False, False]},
-                                {"title": "Bid Volume"}]),
-                    dict(label="Ask Volume",
-                         method="update",
-                         args=[{"visible": [False, True, True, True, True]},
-                               {"title": "Ask Volume"}],
-                         args2=[{"visible": [False, False, False, False, False]},
-                                {"title": "Ask Volume"}]),
-                    dict(label="Both Volumes",
-                         method="update",
-                         args=[{"visible": [True, True, True, True, True]},
-                               {"title": "Both Volumes"}],
-                         args2=[{"visible": [False, False, False, False, False]},
-                                {"title": "Both Volumes"}])
-                ]),
-                direction="down",
-                showactive=False,
-                x=-0.3,
-                xanchor="left",
-                y=1,
-                yanchor="top",
-                bgcolor='rgba(50, 50, 50, 0.8)',
-                bordercolor='white',
-                font=dict(color='white')
+    for i, (name, x, y, row) in enumerate(traces):
+        fig.add_trace(
+            go.Scatter(
+                x=x, 
+                y=y,
+                mode='lines',
+                marker=dict(color=colors[i]),
+                name=name,
+                visible=True
             ),
-            dict(
-                type="buttons",
-                buttons=list([
-                    dict(label="Bid Price",
-                         method="update",
-                         args=[{"visible": [True, True, True, False, False]},
-                               {"title": "Bid Price"}],
-                         args2=[{"visible": [False, False, False, False, False]},
-                                {"title": "Bid Price"}]),
-                    dict(label="Ask Price",
-                         method="update",
-                         args=[{"visible": [True, True, False, True, False]},
-                               {"title": "Ask Price"}],
-                         args2=[{"visible": [False, False, False, False, False]},
-                                {"title": "Ask Price"}]),
-                    dict(label="Trade Price",
-                         method="update",
-                         args=[{"visible": [True, True, False, False, True]},
-                               {"title": "Trade Price"}],
-                         args2=[{"visible": [False, False, False, False, False]},
-                                {"title": "Trade Price"}]),
-                    dict(label="All Prices",
-                         method="update",
-                         args=[{"visible": [True, True, True, True, True]},
-                               {"title": "All Prices"}],
-                         args2=[{"visible": [False, False, False, False, False]},
-                                {"title": "All Prices"}])
-                ]),
-                direction="down",
-                showactive=False,
-                x=-0.3,
-                xanchor="left",
-                y=0.5,
-                yanchor="top",
-                bgcolor='rgba(50, 50, 50, 0.8)',
-                bordercolor='white',
-                font=dict(color='white')
-            )
-        ]
-    )
+            row=row,
+            col=1
+        )
 
-    fig.update_layout(title=f'Volume and Price over Time',
-                      xaxis_title='Time',
-                      xaxis_rangeslider_visible=False,
-                      height=800,
-                      template='plotly_dark')
+    # Create update menus (buttons) for each trace
+    um = []
+    menuadjustment = 0.15
+    buttonX = -0.1
+    buttonY = 1 + menuadjustment
+
+    for i, (name, _, _, _) in enumerate(traces):
+        button = dict(
+            method='restyle',
+            label=name,
+            visible=True,
+            args=[{'visible': True, 'line.color': colors[i]}, [i]],
+            args2=[{'visible': False, 'line.color': colors[i]}, [i]]
+        )
+        
+        buttonY = buttonY - menuadjustment
+        um.append({
+            'buttons': [button],
+            'showactive': False,
+            'y': buttonY,
+            'x': buttonX,
+            'type': 'buttons'
+        })
+
+    # Add "All" button
+    # button_all = dict(
+    #     method='restyle',
+    #     label='All',
+    #     visible=True,
+    #     args=[{'visible': True}],
+    #     args2=[{'visible': False}]
+    # )
+    
+    # um.append({
+    #     'buttons': [button_all],
+    #     'showactive': True,
+    #     'y': buttonY - menuadjustment,
+    #     'x': buttonX,
+    #     'type': 'buttons'
+    # })
+
+    fig.update_layout(
+        title='Volume and Price over Time',
+        xaxis_title='Time',
+        xaxis_rangeslider_visible=False,
+        height=800,
+        template='plotly_dark',
+        showlegend=True,
+        updatemenus=um
+    )
 
     return fig
 
