@@ -321,7 +321,7 @@ def plot_trade_predicted_subplots(stock: str, period: int, predicitions) -> go.F
     fig = make_subplots(rows=2, cols=1, shared_xaxes=True, vertical_spacing=0.02)
 
     fig.add_trace(go.Scatter(x=df_trade['timestamp'], y=df_trade['price'], mode='lines', marker=dict(color='purple'), name='Trade Price'), row=1, col=1)
-    fig.add_trace(go.Scatter(x=df_trade['timestamp'], y=df_trade['mid_price'], mode='lines', marker=dict(color='green'), name='Predicted Trade Price'), row=2, col=1)
+    fig.add_trace(go.Scatter(x=predicitions['timestamp'], y=predicitions['mid_price'], mode='lines', marker=dict(color='green'), name='Predicted Trade Price'), row=2, col=1)
 
     fig.update_layout(title=f'Price over Time',
                       xaxis_title='Time',

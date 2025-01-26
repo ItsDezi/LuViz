@@ -14,7 +14,7 @@ def convert_timestamp_to_seconds(ts):
     return h * 3600 + m * 60 + s
 
 # Base directory containing period directories
-base_dir = 'data/TrainingData'
+base_dir = 'data/train'
 
 # Loop through each period directory
 for period_dir in os.listdir(base_dir):

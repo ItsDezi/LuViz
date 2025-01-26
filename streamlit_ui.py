@@ -13,7 +13,7 @@ with st.sidebar:
     selected = option_menu(
         menu_title="LuViz",
         options=["Asset Comparison", "Price Vs. Volume", "Candlestick Charts", "Standard Deviation", "AI Predictions"],
-        icons=["house", "graph-up", "align-middle"],
+        icons=["house", "graph-up", "align-middle", "activity", "heart-pulse"],
         menu_icon="bi-brightness-alt-high",
         default_index=0,
     )
@@ -148,4 +148,4 @@ if selected == "AI Predictions":
         )
     predictions = predict(option_period, option_stock)
     file_path1 = 'data/TrainingData' + '/Period' + str(option_period) + '/Period' + str(option_period) + '/' + str(option_stock)  # Replace with your CSV file path
-    st.plotly_chart(plot_trade_predicted_subplots(option_stock, option_period, ))
+    st.plotly_chart(plot_trade_predicted_subplots(option_stock, option_period, predicitions=predictions))
