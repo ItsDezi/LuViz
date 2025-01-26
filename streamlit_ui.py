@@ -10,7 +10,7 @@ with st.sidebar:
     selected = option_menu(
         menu_title="LuViz",
         options=["Home", "Price Vs. Volume", "Candlestick Charts"],
-        icons=["house", "graph-up", "envelope"],
+        icons=["house", "graph-up", "align-middle"],
         menu_icon="bi-brightness-alt-high",
         default_index=0,
     )
