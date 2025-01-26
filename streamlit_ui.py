@@ -4,7 +4,7 @@ import streamlit_option_menu
 from streamlit_option_menu import option_menu
 import os
 from volume_plot import plot_csv  # Import the plot_csv function
-from luviz.plotter import plot_group_price_time_series_scatter, plot_candlestick
+from luviz.plotter import plot_group_price_time_series_scatter, plot_candlestick, plot_price_time_series_scatter_subplots, plot_toggleable_volume_price
 
 with st.sidebar:
     selected = option_menu(
@@ -31,12 +31,12 @@ if selected == "Price Vs. Volume":
     with col2:
         option_period = st.selectbox(
             "Period",
-            ("1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15")
+            list(range(1, 16))
         )
-    file_path1 = 'data/TrainingData' + '/Period' + option_period + '/Period' + option_period + '/' + option_stock  # Replace with your CSV file path
+    file_path1 = 'data/TrainingData' + '/Period' + str(option_period) + '/Period' + str(option_period) + '/' + option_stock  # Replace with your CSV file path
 
 
-    st.write(plot_csv(file_path1, 'timestamp', 'askVolume', 'bidVolume'))  # Call the plot_csv function
+    st.write(plot_toggleable_volume_price(option_stock, option_period))  # Call the plot_csv function
     
 
 if selected == "Candlestick Charts":
